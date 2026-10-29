@@ -1,7 +1,7 @@
 [project]
 name = "batch-shuffling-regularization"
 version = "0.1.0"
-description = "Add your description here"
+description = "Does shuffling the training data act as a regularizer? MNIST MLP experiment."
 readme = "README.md"
 authors = [
     { name = "Darian Dieck", email = "dari.dieck@gmx.de" }
@@ -15,10 +15,6 @@ dependencies = [
     "torchvision>=0.26.0",
 ]
 
-[project.scripts]
-batch-shuffling-regularization = "batch_shuffling_regularization:main"
-main = "batch_shuffling_regularization:main"
-
 [build-system]
 requires = ["uv_build>=0.13.5,<0.14.0"]
 build-backend = "uv_build"
@@ -31,3 +27,9 @@ explicit = true
 [tool.uv.sources]
 torch = [{ index = "pytorch-cu128" }]
 torchvision = [{ index = "pytorch-cu128" }]
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "nbconvert>=7.17.2",
+]

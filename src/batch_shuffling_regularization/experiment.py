@@ -40,7 +40,8 @@ def run_experiment(data: MnistData, cfg: TrainConfig) -> None:
             start = time.perf_counter()
             # Same seed -> same initial weights for every variant, so runs can be compared pairwise.
             model = build_mlp(seed=seed, device=data.train.x.device)
-            history = train(model, sorted_data if variant.sort_by_class else data, variant.batch_order, cfg, order_seed=seed)
+            run_data = sorted_data if variant.sort_by_class else data
+            history = train(model, run_data, variant.batch_order, cfg, order_seed=seed)
             path.parent.mkdir(parents=True, exist_ok=True)
             history.to_csv(path)
             print(f"{variant.name} seed {seed}: best val_acc {history['val_acc'].max():.4f} "

@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 
 import torch
@@ -49,3 +49,9 @@ def load_mnist(device: torch.device, n_val: int = 10_000, split_seed: int = 0) -
         val=make_split(x_all[val_idx], y_all[val_idx]),
         test=make_split(x_test, test_raw.targets),
     )
+
+
+def sort_train_by_class(data: MnistData) -> MnistData:
+    # Stable sort: within a class the original MNIST order is kept.
+    order = data.train.y.argsort(stable=True)
+    return replace(data, train=Split(data.train.x[order], data.train.y[order]))

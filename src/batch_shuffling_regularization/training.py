@@ -7,7 +7,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from batch_shuffling_regularization.data import MnistData, Split
+from batch_shuffling_regularization.data import DataSplits, Split
 
 BatchOrder = Callable[[int, int, torch.Generator], torch.Tensor]
 
@@ -34,14 +34,14 @@ def evaluate(model: nn.Module, split: Split) -> tuple[float, float]:
     return loss, acc
 
 
-def epoch_metrics(model: nn.Module, data: MnistData, epoch: int) -> dict[str, float]:
+def epoch_metrics(model: nn.Module, data: DataSplits, epoch: int) -> dict[str, float]:
     row: dict[str, float] = {"epoch": epoch}
     for name, split in [("train", data.train), ("val", data.val), ("test", data.test)]:
         row[f"{name}_loss"], row[f"{name}_acc"] = evaluate(model, split)
     return row
 
 
-def train(model: nn.Module, data: MnistData, batch_order: BatchOrder, cfg: TrainConfig, order_seed: int) -> pd.DataFrame:
+def train(model: nn.Module, data: DataSplits, batch_order: BatchOrder, cfg: TrainConfig, order_seed: int) -> pd.DataFrame:
     if len(data.train) % cfg.batch_size != 0:
         raise ValueError("batch_size must divide the training set size")
 

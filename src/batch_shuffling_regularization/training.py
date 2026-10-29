@@ -19,6 +19,15 @@ class TrainConfig:
     lr: float = 0.1
 
 
+def get_device() -> torch.device:
+    # Runs on the CPU as well, but far slower.
+    return torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+
+def device_name(device: torch.device) -> str:
+    return torch.cuda.get_device_name(device) if device.type == "cuda" else "CPU"
+
+
 def make_deterministic() -> None:
     # Required by cuBLAS for deterministic matrix multiplications; must be set before the first CUDA matmul.
     os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")

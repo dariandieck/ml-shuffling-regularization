@@ -1,4 +1,3 @@
-import argparse
 import time
 from collections.abc import Iterable
 from dataclasses import dataclass
@@ -10,7 +9,7 @@ import torch
 from batch_shuffling_regularization.data import load_dataset, sort_train_by_class
 from batch_shuffling_regularization.model import build_mlp
 from batch_shuffling_regularization.shuffling import VARIANTS
-from batch_shuffling_regularization.training import BatchOrder, TrainConfig, make_deterministic, train
+from batch_shuffling_regularization.training import BatchOrder, TrainConfig, train
 
 RESULTS_DIR = Path(__file__).resolve().parents[2] / "results"
 SEEDS = range(20)
@@ -79,19 +78,3 @@ def load_results(experiment: Experiment) -> pd.DataFrame:
         if (path := run_path(experiment, variant.name, seed)).exists()
     ]
     return pd.concat(frames, ignore_index=True)
-
-
-def parse_args() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="Run the shuffling experiments.")
-    parser.add_argument("experiments", nargs="*", help=f"experiments to run, any of {', '.join(EXPERIMENTS)} (default: all)")
-    parser.add_argument("--shard", default="0/1", help="i/n: only run seeds with seed %% n == i, to run several processes in parallel")
-    return parser.parse_args()
-
-
-if __name__ == "__main__":
-    args = parse_args()
-    index, count = map(int, args.shard.split("/"))
-    seeds = [seed for seed in SEEDS if seed % count == index]
-    make_deterministic()
-    for name in args.experiments or EXPERIMENTS:
-        run_experiment(EXPERIMENTS[name], torch.device("cuda"), seeds)

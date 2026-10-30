@@ -3,6 +3,8 @@ name = "batch-shuffling-regularization"
 version = "0.1.0"
 description = "Does shuffling the training data act as a regularizer? MNIST MLP experiment."
 readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     { name = "Darian Dieck", email = "dari.dieck@gmx.de" }
 ]

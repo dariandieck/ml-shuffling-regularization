@@ -499,7 +499,19 @@ Bei A-D enthält jeder Batch alle Ziffern. E dagegen zeigt eine Treppe: 50 Schri
 
 - E kommt auf 55,7 % (MNIST, Batch 100), 42,2 % (MNIST, Batch 10) und 39,2 % (Fashion-MNIST). A erreicht 98 % bzw. 88,5 %.
 - Innerhalb jeder Epoche verlernt das Netz die früheren Klassen. Am Epochenende hat es zuletzt nur die letzte Klasse gesehen und sagt vor allem diese voraus. Der niedrigste Val-Loss liegt bei 2,0-2,3 also etwa auf dem Niveau von reinem Raten (ln 10 ≈ 2,3).
-- **Der Gap ist hier am kleinsten** (Fashion-MNIST: 0,015). Das ist aber keine gute Generalisierung, sondern Underfitting: Das Netz ist auf den Trainingsdaten genauso schlecht wie auf den Validierungsdaten (Train-Accuracy 35-57 %). Ein kleiner Gap ist nur zusammen mit einem niedrigen Train-Loss ein gutes Zeichen. Deshalb steht oben der Vergleich bei gleichem Train-Loss im Mittelpunkt.
+
+Und so sehen Loss und Gap dazu aus. Der Loss ist logarithmisch skaliert, weil E und A fast zwei Größenordnungen auseinanderliegen:
+
+![Train- und Val-Loss sowie Generalization Gap pro Epoche für A und E](figures/variant_e_loss.png)
+
+> [!NOTE]
+> **Die gepunktete Linie bei ln 10 ≈ 2,30** ist der Loss bei reinem Raten: Ein Modell, das jeder der zehn Klassen 10 % gibt, hat eine Cross-Entropy von −ln 0,1 = ln 10. Dort startet jedes Netz in Epoche 0. Liegt der Loss darüber, ist das Modell schlechter als Raten, weil es sich bei falschen Antworten sicher ist.
+>
+> **Die gestrichelte Train-Kurve von E** liegt fast genau auf der Val-Kurve. Der Abstand ist kleiner als 0,1 bei Werten von 2,4 bis 9, auf der log-Skala sieht man das kaum. Das ist der kleine Gap, der im unteren Plot gezeigt wird.
+
+- Nach der ersten Epoche liegt der Loss von E bei 8-9 (MNIST) bzw. 4 (Fashion-MNIST), also schlechter als Raten. Bis Epoche 30 sinkt er nur auf 2,4-3,7.
+- Dass die Accuracy trotzdem über 10 % liegt, ist kein Widerspruch: Die Accuracy zählt nur, ob die wahrscheinlichste Klasse stimmt. Der Loss bestraft zusätzlich, wie sicher das Netz bei falschen Antworten ist, und am Epochenende tippt es sehr sicher auf die zuletzt gesehene Klasse.
+- **Der Gap ist bei Fashion-MNIST mit Abstand am kleinsten** (0,015 gegenüber 0,39 bei A). Bei MNIST ist er in Epoche 30 nur etwas kleiner als bei A (0,07 gegenüber 0,10) und zwischendurch sogar größer. Das ist aber keine gute Generalisierung, sondern Underfitting: Das Netz ist auf den Trainingsdaten genauso schlecht wie auf den Validierungsdaten (Train-Accuracy 35-57 %). Ein kleiner Gap ist nur zusammen mit einem niedrigen Train-Loss ein gutes Zeichen. Deshalb steht oben der Vergleich bei gleichem Train-Loss im Mittelpunkt.
 
 ### Fazit
 

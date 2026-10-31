@@ -1,3 +1,5 @@
+import contextlib
+import io
 from dataclasses import dataclass, replace
 from pathlib import Path
 
@@ -26,10 +28,21 @@ class DataSplits:
     test: Split
 
 
+def download(dataset: type[MNIST]) -> None:
+    try:
+        dataset(DATA_DIR, train=False)
+    except RuntimeError:
+        print(f"  Downloading {dataset.__name__} to data/ (only on first use)", flush=True)
+        # torchvision prints a bare percentage per file to stderr; the line above says what is happening instead.
+        with contextlib.redirect_stderr(io.StringIO()):
+            dataset(DATA_DIR, download=True)
+
+
 def load_dataset(device: torch.device, name: str = "mnist", n_val: int = 10_000, split_seed: int = 0) -> DataSplits:
     dataset = DATASETS[name]
-    train_raw = dataset(DATA_DIR, train=True, download=True)
-    test_raw = dataset(DATA_DIR, train=False, download=True)
+    download(dataset)
+    train_raw = dataset(DATA_DIR, train=True)
+    test_raw = dataset(DATA_DIR, train=False)
 
     x_all = train_raw.data.reshape(-1, 28 * 28).float() / 255
     y_all = train_raw.targets

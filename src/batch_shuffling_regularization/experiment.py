@@ -50,23 +50,45 @@ def run_path(experiment: Experiment, variant: str, seed: int) -> Path:
     return RESULTS_DIR / experiment.name / "runs" / f"{variant}_seed{seed}.csv"
 
 
-def run_experiment(experiment: Experiment, device: torch.device, seeds: Iterable[int] = SEEDS) -> None:
+def format_duration(seconds: float) -> str:
+    minutes, secs = divmod(round(seconds), 60)
+    hours, minutes = divmod(minutes, 60)
+    return f"{hours} h {minutes:02d} min" if hours else f"{minutes} min {secs:02d} s" if minutes else f"{secs} s"
+
+
+def run_experiment(experiment: Experiment, device: torch.device, seeds: Iterable[int] = SEEDS) -> int:
+    seeds = list(seeds)
+    todo = [
+        (seed, variant)
+        for seed in seeds
+        for variant in EXPERIMENT_VARIANTS
+        if not run_path(experiment, variant.name, seed).exists()
+    ]
+    total = len(seeds) * len(EXPERIMENT_VARIANTS)
+    cfg = experiment.cfg
+    print(f"\n{experiment.name}: {experiment.dataset}, batch size {cfg.batch_size}, lr {cfg.lr}, {cfg.epochs} epochs")
+    if not todo:
+        print(f"  All {total} runs are already in results/{experiment.name}/runs, nothing to train", flush=True)
+        return 0
+    print(f"  {total - len(todo)}/{total} runs already done, training {len(todo)}", flush=True)
+
     data = load_dataset(device, experiment.dataset)
     sorted_data = sort_train_by_class(data)
-    for seed in seeds:
-        for variant in EXPERIMENT_VARIANTS:
-            path = run_path(experiment, variant.name, seed)
-            if path.exists():
-                continue
-            start = time.perf_counter()
-            # Same seed -> same initial weights for every variant, so runs can be compared pairwise.
-            model = build_mlp(seed=seed, device=device)
-            run_data = sorted_data if variant.sort_by_class else data
-            history = train(model, run_data, variant.batch_order, experiment.cfg, order_seed=seed)
-            path.parent.mkdir(parents=True, exist_ok=True)
-            history.to_csv(path)
-            print(f"{experiment.name} {variant.name} seed {seed}: best val_acc {history['val_acc'].max():.4f} "
-                  f"({time.perf_counter() - start:.0f} s)", flush=True)
+    start = time.perf_counter()
+    for i, (seed, variant) in enumerate(todo, start=1):
+        run_start = time.perf_counter()
+        # Same seed -> same initial weights for every variant, so runs can be compared pairwise.
+        model = build_mlp(seed=seed, device=device)
+        run_data = sorted_data if variant.sort_by_class else data
+        history = train(model, run_data, variant.batch_order, cfg, order_seed=seed)
+        path = run_path(experiment, variant.name, seed)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        history.to_csv(path)
+        # Extrapolated from the runs so far on this machine.
+        remaining = (time.perf_counter() - start) / i * (len(todo) - i)
+        print(f"  [{i:>{len(str(len(todo)))}}/{len(todo)}] {variant.name} seed {seed}: best val_acc {history['val_acc'].max():.4f} "
+              f"({time.perf_counter() - run_start:.0f} s" + (f", ~{format_duration(remaining)} left)" if i < len(todo) else ")"), flush=True)
+    return len(todo)
 
 
 def load_results(experiment: Experiment) -> pd.DataFrame:

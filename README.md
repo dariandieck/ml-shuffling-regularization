@@ -523,7 +523,7 @@ Was spannend wäre:
 - **Momentum oder Adam:** Bleibt der Effekt, wenn der Optimierer den Pfad selbst glättet?
 - **LR-Scheduling:** Mit sinkender Lernrate werden die letzten Schritte einer Epoche immer unwichtiger. Verschwindet der Effekt dann?
 - **Zusätzliche Regularisierung:** Bringt Shuffling noch etwas, wenn schon Dropout oder Weight Decay aktiv sind?
-- **Größere Modelle und Datensätze:** CNNs auf CIFAR-10, wo deutlich mehr Overfitting möglich ist.
+- **Komplexere Modelle und Datensätze:** Größere und tiefere MLPs oder CNNs auf CIFAR-10, wo deutlich mehr Overfitting möglich ist. Oder auch (random) Undersampling? 
 - **Eine Variante zwischen B und D**, zum Beispiel nur jede k-te Epoche neu shuffeln: Ab wann geht der Effekt verloren?
 
 ---
